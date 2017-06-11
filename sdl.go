@@ -17,6 +17,16 @@ var Done chan bool = make(chan bool)
 type Signal interface{}
 type SignalChan chan Signal
 
+// Process function accepts a process definition.
+// It initializes the buffer where the process is reading from.
+// It returns the buffer of the process so that other
+// processes can write to it.
+func Process(states func(SignalChan)) chan Signal {
+	buffer := make(chan Signal, 100)
+	states(buffer)
+	return buffer
+}
+
 // State function receives the buffer of the process
 // and a callback function on the signal to be consumed from the buffer.
 // It returns a function that will be called by the process
@@ -25,12 +35,12 @@ type SignalChan chan Signal
 func State(buffer SignalChan, f func(s Signal)) func() {
 	return func() {
 		for { // while in this state
-				s, exit := nextSignal(buffer)
-				if exit {
-					return
-				}
-				f(s)
+			s, exit := nextSignal(buffer)
+			if exit {
+				return
 			}
+			f(s)
+		}
 	}
 }
 
@@ -44,6 +54,6 @@ func nextSignal(b SignalChan) (Signal, bool) {
 }
 
 // Closes the Done channel so that all processes terminate.
-func EndProceses() {
+func EndProcesses() {
 	close(Done)
 }
