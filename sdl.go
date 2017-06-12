@@ -17,13 +17,13 @@ var Done chan bool = make(chan bool)
 // Signal is the main structure communicated on channels.
 // It can be any type.
 type Signal interface{}
-type SignalChan chan Signal
+//type SignalChan chan Signal
 
 // Process function accepts a process definition.
 // It initializes the buffer where the process is reading from.
 // It returns the buffer of the process so that other
 // processes can write to it.
-func Process(states func(SignalChan)) chan Signal {
+func Process(states func(<-chan Signal)) chan<- Signal {
 	buffer := make(chan Signal, bufferSize)
 	states(buffer)
 	return buffer
@@ -34,7 +34,7 @@ func Process(states func(SignalChan)) chan Signal {
 // It returns a function that will be called by the process
 // when entering the state.
 // State returns when the channel Done is closed.
-func State(buffer SignalChan, f func(s Signal)) func() {
+func State(buffer <-chan Signal, f func(s Signal)) func() {
 	return func() {
 		for { // while in this state
 			s, exit := nextSignal(buffer)
@@ -46,7 +46,7 @@ func State(buffer SignalChan, f func(s Signal)) func() {
 	}
 }
 
-func nextSignal(b SignalChan) (Signal, bool) {
+func nextSignal(b <-chan Signal) (Signal, bool) {
 	select {
 	case s := <-b: // blocking if empty buffer
 		fmt.Printf("PROCESS:  %T, %v\n", s, s)
@@ -63,7 +63,7 @@ func EndProcesses() {
 
 // Reads all signals at channel p and logs them at std out
 // together with the name of the consumer
-func ChannelConsumer(n string, p SignalChan) {
+func ChannelConsumer(n string, p chan Signal) {
 	for {
 		select {
 		case s := <-p: // blocking if empty buffer
@@ -76,7 +76,7 @@ func ChannelConsumer(n string, p SignalChan) {
 
 // Sends all the signals in the signal list to channel c
 // with a delay between each transmission equal to ms milliseconds
-func SendSignalsWithDelay(c SignalChan, ss []Signal, ms time.Duration) {
+func SendSignalsWithDelay(c chan<- Signal, ss []Signal, ms time.Duration) {
 	for _, s := range ss {
 		c <- s
 		time.Sleep(ms * time.Millisecond)
