@@ -3,9 +3,11 @@
 package sdl
 
 import (
-	_ "fmt"
-	_ "time"
+	"fmt"
+	"time"
 )
+
+var bufferSize = 100
 
 // The channel Done is used for terminating all processes.
 // Each process returns after a select on channel Done.
@@ -22,7 +24,7 @@ type SignalChan chan Signal
 // It returns the buffer of the process so that other
 // processes can write to it.
 func Process(states func(SignalChan)) chan Signal {
-	buffer := make(chan Signal, 100)
+	buffer := make(chan Signal, bufferSize)
 	states(buffer)
 	return buffer
 }
@@ -47,6 +49,7 @@ func State(buffer SignalChan, f func(s Signal)) func() {
 func nextSignal(b SignalChan) (Signal, bool) {
 	select {
 	case s := <-b: // blocking if empty buffer
+		fmt.Printf("PROCESS:  %T, %v\n", s, s)
 		return s, false
 	case <-Done: // signal for process termination
 		return nil, true
@@ -56,4 +59,37 @@ func nextSignal(b SignalChan) (Signal, bool) {
 // Closes the Done channel so that all processes terminate.
 func EndProcesses() {
 	close(Done)
+}
+
+// Reads all signals at channel p and logs them at std out
+// together with the name of the consumer
+func ChannelConsumer(n string, p SignalChan) {
+	for {
+		select {
+		case s := <-p: // blocking if empty buffer
+			fmt.Printf("%s <- %T, %v\n", n, s, s)
+		case <-Done: // signal for process termination
+			return
+		}
+	}
+}
+
+// Sends all the signals in the signal list to channel c
+// with a delay between each transmission equal to ms milliseconds
+func SendSignalsWithDelay(c SignalChan, ss []Signal, ms time.Duration) {
+	for _, s := range ss {
+		c <- s
+		time.Sleep(ms * time.Millisecond)
+	}
+}
+
+// Creates and returns a buffer for asynchronous communication
+// Buffersize is defined by SetBufferSize
+func MakeBuffer() chan Signal {
+	return make(chan Signal, bufferSize)
+}
+
+// Sets the size of process buffers. Default is 100
+func SetBufferSize(s int) {
+	bufferSize = s
 }
