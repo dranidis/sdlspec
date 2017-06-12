@@ -1,0 +1,19 @@
+mode: set
+github.com/dranidis/go-sdl-spec/sdl.go:30.68,35.2 4 1
+github.com/dranidis/go-sdl-spec/sdl.go:42.49,43.16 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:43.16,44.7 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:44.7,46.12 2 1
+github.com/dranidis/go-sdl-spec/sdl.go:49.4,49.8 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:46.12,48.5 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:54.44,55.9 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:56.23,58.18 2 1
+github.com/dranidis/go-sdl-spec/sdl.go:59.14,60.19 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:65.21,67.2 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:71.47,72.6 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:72.6,73.10 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:74.17,75.41 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:76.15,77.10 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:84.75,85.23 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:85.23,88.3 2 1
+github.com/dranidis/go-sdl-spec/sdl.go:93.31,95.2 1 1
+github.com/dranidis/go-sdl-spec/sdl.go:98.27,100.2 1 1

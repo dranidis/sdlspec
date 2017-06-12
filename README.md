@@ -11,25 +11,26 @@ package main
 
 import (
 	"fmt"
-	"github.com/dranidis/go-sdl-spec"
 	"time"
+
+	"github.com/dranidis/go-sdl-spec"
 )
 
 type HI struct{}
 
-func helloStates(buffer sdl.SignalChan) {
-	start := sdl.State(buffer, func(s sdl.Signal) {
+func helloStates(p *sdl.Process) {
+	start := sdl.State(p, func(s sdl.Signal) {
 		switch s.(type) {
 		case HI:
 			fmt.Println("Hello SDL")
 		default:
 		}
 	})
-		go start()
+	go start()
 }
 
 func main() {
-	helloProcess := sdl.Process(helloStates)
+	helloProcess := sdl.MakeProcess(helloStates, "hello")
 
 	helloProcess <- HI{}
 
@@ -40,8 +41,9 @@ func main() {
 
 The output is:
 ```
-PROCESS:  main.HI, {}
+PROCESS hello:  main.HI, {}
 Hello SDL
+
 ```
 
 ## Signals
@@ -50,26 +52,26 @@ Each SDL signal is declared as a new go struct type:
 type HI struct {}
 ```
 ## Processes
-A process is created using the sdl.Process function:
+A process is created using the sdl.MakeProcess function:
 ```go
-	helloProcess := sdl.Process(helloStates)
+	helloProcess := sdl.MakeProcess(helloStates, "hello")
 ```
 that takes as a parameter a function like the following:
 ```go
-func helloStates(buffer sdl.SignalChan) {
-	start := sdl.State(buffer, func(s sdl.Signal) {
+func helloStates(p *sdl.Process) {
+	start := sdl.State(p, func(s sdl.Signal) {
 		switch s.(type) {
 		case HI:
 			fmt.Println("Hello SDL")
 		default:
 		}
 	})
-		go start()
+	go start()
 }
 ```
 The function defines a state **start** using the construction:
 ```go
-	start := sdl.State(buffer, func(s sdl.Signal) { ... })
+	start := sdl.State(p, func(s sdl.Signal) { ... })
 ```
 The callback function defines the behaviour at that state. The important part is within the switch statement:
 ```go
@@ -81,7 +83,7 @@ If the received signal is of type HI, print the Hello SDL message. Else ignore i
 
 The process is spawned at the initial state with:
 ```go
-		go start()
+	go start()
 ```
 In the main:
 ```go
