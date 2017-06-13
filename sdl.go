@@ -20,6 +20,12 @@ type Process struct {
 	buffer chan Signal
 	name string
 	die chan Signal
+	saved []Signal
+	nextSaved []Signal
+}
+
+func save(p *Process, s Signal) {
+	p.nextSaved = append(p.nextSaved, s)
 }
 
 func DieChannel(p *Process) chan Signal {
@@ -34,7 +40,9 @@ func DieChannel(p *Process) chan Signal {
 // processes can write to it.
 func MakeProcess(states func(*Process), name string, die chan Signal) chan<- Signal {
 	buffer := make(chan Signal, bufferSize)
-	p := Process{buffer, name, die}
+	saved := [] Signal{}
+	nextSaved := [] Signal{}
+	p := Process{buffer, name, die, saved, nextSaved}
 	states(&p)
 	return p.buffer
 }
@@ -46,6 +54,14 @@ func MakeProcess(states func(*Process), name string, die chan Signal) chan<- Sig
 // State returns when the channel Done is closed.
 func State(p *Process, f func(s Signal)) func() {
 	return func() {
+		// copy the saved signals to the actual buffer
+		p.saved = make([]Signal, len(p.nextSaved))
+		copy(p.saved, p.nextSaved)
+		p.nextSaved = []Signal{}
+		// first handle all messages in the saved buffer
+		for _, s := range p.saved {
+			f(s)
+		}
 		for { // while in this state
 			s, exit := nextSignal(p)
 			if exit {
