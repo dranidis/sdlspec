@@ -9,27 +9,32 @@ import (
 
 var bufferSize = 100
 
-// The channel Done is used for terminating all processes.
-// Each process returns after a select on channel Done.
-// The main closes Done at termination by calling EndProcess.
-var Done chan bool = make(chan bool)
-
 // Signal is the main structure communicated on channels.
 // It can be any type.
 type Signal interface{}
 //type SignalChan chan Signal
 
+// Process is a type encapsulating the buffer of a process and the name of 
+// a process.
 type Process struct {
 	buffer chan Signal
 	name string
+	die chan Signal
 }
-// MakeProcess function accepts a process definition and a name.
+
+func DieChannel(p *Process) chan Signal {
+	return p.die
+}
+// MakeProcess accepts a process definition and a name.
+// It also receives a signal channel used for termination.
+// All processes sharing the same die channel will terminate
+// when close(die) is called.
 // It initializes the buffer where the process is reading from.
 // It returns the buffer of the process so that other
 // processes can write to it.
-func MakeProcess(states func(*Process), name string) chan<- Signal {
+func MakeProcess(states func(*Process), name string, die chan Signal) chan<- Signal {
 	buffer := make(chan Signal, bufferSize)
-	p := Process{buffer, name}
+	p := Process{buffer, name, die}
 	states(&p)
 	return p.buffer
 }
@@ -56,24 +61,19 @@ func nextSignal(p *Process) (Signal, bool) {
 	case s := <-p.buffer: // blocking if empty buffer
 		fmt.Printf("PROCESS %s:  %T, %v\n", p.name, s, s)
 		return s, false
-	case <-Done: // signal for process termination
+	case <-p.die: // signal for process termination
 		return nil, true
 	}
 }
 
-// Closes the Done channel so that all processes terminate.
-func EndProcesses() {
-	close(Done)
-}
-
 // Reads all signals at channel p and logs them at std out
 // together with the name of the consumer
-func ChannelConsumer(n string, p chan Signal) {
+func ChannelConsumer(die chan Signal, n string, p chan Signal) {
 	for {
 		select {
 		case s := <-p: // blocking if empty buffer
 			fmt.Printf("%s <- %T, %v\n", n, s, s)
-		case <-Done: // signal for process termination
+		case <-die: // signal for process termination
 			return
 		}
 	}
