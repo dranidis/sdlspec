@@ -1,4 +1,4 @@
-# go-sdl-spec
+# SDL specification and simulation in GO
 
 The purpose of this package is to allow easy definition and simulation of SDL (Specification and Description Language http://sdl-forum.org/index.htm) processes in GO.
 
@@ -30,12 +30,12 @@ func helloStates(p *sdl.Process) {
 }
 
 func main() {
-	helloProcess := sdl.MakeProcess(helloStates, "hello")
-
+	die := make(chan sdl.Signal)
+	helloProcess := sdl.MakeProcess(helloStates, "hello", die)
 	helloProcess <- HI{}
 
-	time.Sleep(2000 * time.Millisecond)
-	sdl.EndProcesses()
+	time.Sleep(1000 * time.Millisecond)
+	close(die)
 }
 ```
 
@@ -54,7 +54,7 @@ type HI struct {}
 ## Processes
 A process is created using the sdl.MakeProcess function:
 ```go
-	helloProcess := sdl.MakeProcess(helloStates, "hello")
+	helloProcess := sdl.MakeProcess(helloStates, "hello", die)
 ```
 that takes as a parameter a function like the following:
 ```go
@@ -75,11 +75,13 @@ The function defines a state **start** using the construction:
 ```
 The callback function defines the behaviour at that state. The important part is within the switch statement:
 ```go
+		switch s.(type) {
 		case HI:
 			fmt.Println("Hello SDL")
 		default:
+		}
 ```
-If the received signal is of type HI, print the Hello SDL message. Else ignore it.
+If the received signal is of type HI, print the Hello SDL message. Else ignore the signal. Note that the signal is consumed anyway.
 
 The process is spawned at the initial state with:
 ```go
@@ -89,6 +91,6 @@ In the main:
 ```go
     helloProcess <- HI{}
     time.Sleep(2000 * time.Millisecond)
-    sdl.EndProcesses()
+	close(die)
 ```
-we send the signal `HI{}` to the process, sleep for 2 secs and terminate all SDL processes.
+we send the signal `HI{}` to the process, sleep for 2 secs and terminate all SDL processes by closing the `die` channel.
