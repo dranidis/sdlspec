@@ -91,6 +91,6 @@ In the main:
 ```go
     helloProcess <- HI{}
     time.Sleep(2000 * time.Millisecond)
-	close(die)
+    close(die)
 ```
 we send the signal `HI{}` to the process, sleep for 2 secs and terminate all SDL processes by closing the `die` channel.
