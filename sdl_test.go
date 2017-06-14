@@ -16,7 +16,7 @@ func TestCaseAndDefault(t *testing.T) {
 	testVar := 0
 	die := make(chan Signal)
 	helloProcess := MakeProcess(func(p *Process) {
-		start := State(p, func(s Signal) {
+		start := State(p, "start", func(s Signal) {
 			switch s.(type) {
 			case HI:
 				testVar = 1
@@ -52,7 +52,7 @@ func TestChangingState(t *testing.T) {
 
 	helloProcess := MakeProcess(func(p *Process) {
 		var next func()
-		start := State(p, func(s Signal) {
+		start := State(p, "start", func(s Signal) {
 			switch s.(type) {
 			case HI:
 				defer next()
@@ -60,7 +60,7 @@ func TestChangingState(t *testing.T) {
 			default:
 			}
 		})
-		next = State(p, func(s Signal) {
+		next = State(p, "next", func(s Signal) {
 			switch s.(type) {
 			case HI:
 				testVar += 1
@@ -91,7 +91,7 @@ func TestSaveSignal(t *testing.T) {
 
 	helloProcess := MakeProcess(func(p *Process) {
 		var next func()
-		start := State(p, func(s Signal) {
+		start := State(p, "start", func(s Signal) {
 			switch s.(type) {
 			case HI:
 				defer next()
@@ -101,7 +101,7 @@ func TestSaveSignal(t *testing.T) {
 			default:
 			}
 		})
-		next = State(p, func(s Signal) {
+		next = State(p, "next", func(s Signal) {
 			switch s.(type) {
 			case HO:
 				testVar += 1
@@ -132,7 +132,7 @@ func TestSaveThenIgnoreSignal(t *testing.T) {
 
 	helloProcess := MakeProcess(func(p *Process) {
 		var next1, next2 func()
-		start := State(p, func(s Signal) {
+		start := State(p, "start", func(s Signal) {
 			switch s.(type) {
 			case HI:
 				defer next1()
@@ -142,7 +142,7 @@ func TestSaveThenIgnoreSignal(t *testing.T) {
 			default:
 			}
 		})
-		next1 = State(p, func(s Signal) {
+		next1 = State(p, "next1", func(s Signal) {
 			switch s.(type) {
 			case HI:
 				defer next2()
@@ -150,18 +150,19 @@ func TestSaveThenIgnoreSignal(t *testing.T) {
 			default:
 			}
 		})	
-		next2 = State(p, func(s Signal) {
+		next2 = State(p, "next2", func(s Signal) {
 			switch s.(type) {
 			case HO:
 				testVar += 1
+			case HI:
 			default:
 			}
 		})		
 		go start()
-	}, "hello1", die)
+	}, "hello2", die)
 
 	SendSignalsWithDelay(helloProcess, []Signal{
-		HO{1}, HO{2}, HO{3}, HI{4}, HI{5},
+		HO{1}, HO{2}, HO{3}, HI{4}, HI{5}, HI{6},
 	}, 10)
 
 	// Done should be encapsulated into the process
@@ -180,7 +181,7 @@ func TestChannelConsumer(t *testing.T) {
 	out := MakeBuffer()
 
 	helloStates1 := func(p *Process) {
-		start := State(p, func(s Signal) {
+		start := State(p, "start", func(s Signal) {
 			switch s.(type) {
 			case HI:
 				out <- HO{}

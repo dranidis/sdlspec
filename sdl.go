@@ -30,6 +30,7 @@ type Process struct {
 	die chan Signal
 	saved []Signal
 	nextSaved []Signal
+	currentState string
 }
 
 func save(p *Process, s Signal) {
@@ -50,9 +51,18 @@ func MakeProcess(states func(*Process), name string, die chan Signal) chan<- Sig
 	buffer := make(chan Signal, bufferSize)
 	saved := [] Signal{}
 	nextSaved := [] Signal{}
-	p := Process{buffer, name, die, saved, nextSaved}
+	p := Process{buffer, name, die, saved, nextSaved, ""}
 	states(&p)
 	return p.buffer
+}
+
+// Ignored is a helper function to print a message for ignored (consumed) messages.
+// It is placed within the default section of a switch of a state.
+// It prints only when Logging is enabled.
+func Ignored(p *Process, s Signal) {
+	if logging {
+		fmt.Printf("PROCESS %s AT STATE %s: IGNORES %T, %v\n", p.name, p.currentState, s, s)
+	}
 }
 
 // State function receives the process
@@ -60,8 +70,9 @@ func MakeProcess(states func(*Process), name string, die chan Signal) chan<- Sig
 // It returns a function that will be called by the process
 // when entering the state.
 // State returns when the channel Done is closed.
-func State(p *Process, f func(s Signal)) func() {
+func State(p *Process, name string, f func(s Signal)) func() {
 	return func() {
+		p.currentState = name
 		// copy the saved signals to the actual buffer
 		p.saved = make([]Signal, len(p.nextSaved))
 		copy(p.saved, p.nextSaved)
@@ -84,7 +95,7 @@ func nextSignal(p *Process) (Signal, bool) {
 	select {
 	case s := <-p.buffer: // blocking if empty buffer
 		if logging {
-			fmt.Printf("PROCESS %s:  %T, %v\n", p.name, s, s)
+			fmt.Printf("PROCESS %s AT STATE %s: %T, %v\n", p.name, p.currentState, s, s)
 		}
 		return s, false
 	case <-p.die: // signal for process termination
