@@ -9,10 +9,18 @@ import (
 
 var bufferSize = 100
 
+var logging = true
+
+func DisableLogging() {
+	logging = false
+}
+func EnableLogging() {
+	logging = true
+}
+
 // Signal is the main structure communicated on channels.
 // It can be any type.
 type Signal interface{}
-//type SignalChan chan Signal
 
 // Process is a type encapsulating the buffer of a process and the name of 
 // a process.
@@ -75,7 +83,9 @@ func State(p *Process, f func(s Signal)) func() {
 func nextSignal(p *Process) (Signal, bool) {
 	select {
 	case s := <-p.buffer: // blocking if empty buffer
-		fmt.Printf("PROCESS %s:  %T, %v\n", p.name, s, s)
+		if logging {
+			fmt.Printf("PROCESS %s:  %T, %v\n", p.name, s, s)
+		}
 		return s, false
 	case <-p.die: // signal for process termination
 		return nil, true
@@ -88,7 +98,9 @@ func ChannelConsumer(die chan Signal, n string, p chan Signal) {
 	for {
 		select {
 		case s := <-p: // blocking if empty buffer
-			fmt.Printf("%s <- %T, %v\n", n, s, s)
+			if logging {
+				fmt.Printf("%s <- %T, %v\n", n, s, s)
+			}
 		case <-die: // signal for process termination
 			return
 		}
