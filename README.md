@@ -19,7 +19,7 @@ import (
 type HI struct{}
 
 func helloStates(p *sdl.Process) {
-	start := sdl.State(p, func(s sdl.Signal) {
+	start := sdl.State(p, "start", func(s sdl.Signal) {
 		switch s.(type) {
 		case HI:
 			fmt.Println("Hello SDL")
@@ -41,7 +41,7 @@ func main() {
 
 The output is:
 ```
-PROCESS hello:  main.HI, {}
+PROCESS hello AT STATE start: main.HI, {}
 Hello SDL
 
 ```
@@ -59,7 +59,7 @@ A process is created using the sdl.MakeProcess function:
 that takes as a parameter a function like the following:
 ```go
 func helloStates(p *sdl.Process) {
-	start := sdl.State(p, func(s sdl.Signal) {
+	start := sdl.State(p, "start", func(s sdl.Signal) {
 		switch s.(type) {
 		case HI:
 			fmt.Println("Hello SDL")
@@ -71,7 +71,7 @@ func helloStates(p *sdl.Process) {
 ```
 The function defines a state **start** using the construction:
 ```go
-	start := sdl.State(p, func(s sdl.Signal) { ... })
+	start := sdl.State(p, "start", func(s sdl.Signal) { ... })
 ```
 The callback function defines the behaviour at that state. The important part is within the switch statement:
 ```go
