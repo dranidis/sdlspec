@@ -22,14 +22,14 @@ func EnableLogging() {
 // It can be any type.
 type Signal interface{}
 
-// Process is a type encapsulating the buffer of a process and the name of 
+// Process is a type encapsulating the buffer of a process and the name of
 // a process.
 type Process struct {
-	buffer chan Signal
-	name string
-	die chan Signal
-	saved []Signal
-	nextSaved []Signal
+	buffer       chan Signal
+	name         string
+	die          chan Signal
+	saved        []Signal
+	nextSaved    []Signal
 	currentState string
 }
 
@@ -40,6 +40,7 @@ func save(p *Process, s Signal) {
 func DieChannel(p *Process) chan Signal {
 	return p.die
 }
+
 // MakeProcess accepts a process definition and a name.
 // It also receives a signal channel used for termination.
 // All processes sharing the same die channel will terminate
@@ -49,8 +50,8 @@ func DieChannel(p *Process) chan Signal {
 // processes can write to it.
 func MakeProcess(states func(*Process), name string, die chan Signal) chan<- Signal {
 	buffer := make(chan Signal, bufferSize)
-	saved := [] Signal{}
-	nextSaved := [] Signal{}
+	saved := []Signal{}
+	nextSaved := []Signal{}
 	p := Process{buffer, name, die, saved, nextSaved, ""}
 	states(&p)
 	return p.buffer
@@ -77,6 +78,10 @@ func State(p *Process, name string, f func(s Signal)) func() {
 		p.saved = make([]Signal, len(p.nextSaved))
 		copy(p.saved, p.nextSaved)
 		p.nextSaved = []Signal{}
+
+		if logging {
+			fmt.Printf("PROCESS %s AT STATE %s\n", p.name, p.currentState)
+		}
 		// first handle all messages in the saved buffer
 		for _, s := range p.saved {
 			f(s)
@@ -109,9 +114,9 @@ func ChannelConsumer(die chan Signal, n string, p chan Signal) {
 	for {
 		select {
 		case s := <-p: // blocking if empty buffer
-			if logging {
-				fmt.Printf("%s <- %T, %v\n", n, s, s)
-			}
+			//if logging {
+			fmt.Printf("\t\t\t\t\t%T , %v\t->%s\n", s, s, n)
+			//}
 		case <-die: // signal for process termination
 			return
 		}
@@ -136,4 +141,26 @@ func MakeBuffer() chan Signal {
 // Sets the size of process buffers. Default is 100
 func SetBufferSize(s int) {
 	bufferSize = s
+}
+
+// Used for simulations. Defines a delay in ms, after which the signal is sent to
+// the receiver channel. Executed with the Execute method for one Trasmission or with the
+// Execute function for a variant number of Transmissions.
+type Transmission struct {
+	MsDelay  int
+	Receiver chan Signal
+	Signal   Signal
+}
+
+// Exetutes a number of Transmissions.
+func Execute(ts ...Transmission) {
+	for _, t := range ts {
+		t.Execute()
+	}
+}
+
+// Executes a single Transmission.
+func (t Transmission) Execute() {
+	time.Sleep(time.Duration(t.MsDelay) * time.Millisecond)
+	t.Receiver <- t.Signal
 }
