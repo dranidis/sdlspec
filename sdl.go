@@ -148,7 +148,7 @@ func SetBufferSize(s int) {
 // Execute function for a variant number of Transmissions.
 type Transmission struct {
 	MsDelay  int
-	Receiver chan Signal
+	Receiver chan<- Signal
 	Signal   Signal
 }
 
@@ -163,4 +163,10 @@ func Execute(ts ...Transmission) {
 func (t Transmission) Execute() {
 	time.Sleep(time.Duration(t.MsDelay) * time.Millisecond)
 	t.Receiver <- t.Signal
+}
+
+// Helper function for printing a message that it is consumed as
+// a default action at a switch signal.
+func DefaultMsg(n string, s Signal) {
+	fmt.Printf("\t\t------ At state %s consumed %v, %T\n", n, s, s)
 }
