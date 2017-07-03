@@ -5,6 +5,7 @@ package sdl
 import (
 	"fmt"
 	"time"
+	"github.com/fatih/color"
 )
 
 var bufferSize = 100
@@ -62,7 +63,8 @@ func MakeProcess(states func(*Process), name string, die chan Signal) chan<- Sig
 // It prints only when Logging is enabled.
 func Ignored(p *Process, s Signal) {
 	if logging {
-		fmt.Printf("PROCESS %s AT STATE %s: IGNORES %T, %v\n", p.name, p.currentState, s, s)
+		d := color.New(color.FgCyan, color.Bold)
+		d.Printf("PROCESS %s AT STATE %s: IGNORES %T, %v\n", p.name, p.currentState, s, s)
 	}
 }
 
@@ -100,7 +102,9 @@ func nextSignal(p *Process) (Signal, bool) {
 	select {
 	case s := <-p.buffer: // blocking if empty buffer
 		if logging {
-			fmt.Printf("PROCESS %s AT STATE %s: %T, %v\n", p.name, p.currentState, s, s)
+			red := color.New(color.FgRed)
+			boldRed := red.Add(color.Bold)
+			boldRed.Printf("PROCESS %s AT STATE %s: %T, %v\n", p.name, p.currentState, s, s)
 		}
 		return s, false
 	case <-p.die: // signal for process termination
@@ -168,5 +172,6 @@ func (t Transmission) Execute() {
 // Helper function for printing a message that it is consumed as
 // a default action at a switch signal.
 func DefaultMsg(n string, s Signal) {
-	fmt.Printf("\t\t------ At state %s consumed %v, %T\n", n, s, s)
+	d := color.New(color.FgCyan, color.Bold)
+	d.Printf("\t\t------ At state %s Consumed %v, %T\n", n, s, s)
 }
