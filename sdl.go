@@ -11,6 +11,10 @@ import (
 
 var	mux sync.Mutex
 
+var enterStateColor = color.New(color.FgBlue)
+var nextSignalColor = color.New(color.FgRed)
+var	consumerColor = color.New(color.FgYellow, color.Bold)
+var transmissionColor = color.New(color.FgGreen, color.Bold)
 
 var bufferSize = 100
 
@@ -89,7 +93,6 @@ func State(p *Process, name string, f func(s Signal)) func() {
 
 		if logging {
 			mux.Lock()
-			enterStateColor := color.New(color.FgBlue)
 			enterStateColor.Printf("PROCESS %s entered STATE %s\n", p.name, p.currentState)
 			mux.Unlock()
 		}
@@ -112,7 +115,6 @@ func nextSignal(p *Process) (Signal, bool) {
 	case s := <-p.buffer: // blocking if empty buffer
 		if logging {
 			mux.Lock()
-			nextSignalColor := color.New(color.FgRed)
 			nextSignalColor.Printf("PROCESS %s AT STATE %s: %T, %v\n", p.name, p.currentState, s, s)
 			mux.Unlock()
 		}
@@ -129,9 +131,8 @@ func ChannelConsumer(die chan Signal, n string, p chan Signal) {
 		select {
 		case s := <-p: // blocking if empty buffer
 			mux.Lock()
-			consumerColor := color.New(color.FgYellow, color.Bold)
 			//if logging {
-			consumerColor.Printf("\t\t\t\t\t%T , %v\t-> %s\n", s, s, n)
+			consumerColor.Printf("\t\t\t\t\t%T , %v -> %s\n", s, s, n)
 			mux.Unlock()
 			//}
 		case <-die: // signal for process termination
@@ -145,6 +146,11 @@ func ChannelConsumer(die chan Signal, n string, p chan Signal) {
 func SendSignalsWithDelay(c chan<- Signal, ss []Signal, ms time.Duration) {
 	for _, s := range ss {
 		c <- s
+
+		mux.Lock()
+		transmissionColor.Printf("%T %v\n", s, s)
+		mux.Unlock()
+
 		time.Sleep(ms * time.Millisecond)
 	}
 }
@@ -182,8 +188,7 @@ func (t Transmission) Execute() {
 	t.Receiver <- t.Signal
 	
 	mux.Lock()
-	transimssionColor := color.New(color.FgGreen, color.Bold)
-	transimssionColor.Printf("%T %v\n", t.Signal, t.Signal)
+	transmissionColor.Printf("%T %v\n", t.Signal, t.Signal)
 	mux.Unlock()
 }
 
@@ -192,6 +197,6 @@ func (t Transmission) Execute() {
 func DefaultMsg(n string, s Signal) {
 	mux.Lock()
 	d := color.New(color.FgCyan)
-	d.Printf("\t\t------ At state %s Consumed %v, %T\n", n, s, s)
+	d.Printf("------ At state %s ignored %v, %T\n", n, s, s)
 	mux.Unlock()
 }
