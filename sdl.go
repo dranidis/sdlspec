@@ -3,10 +3,14 @@
 package sdl
 
 import (
-	"fmt"
+	_ "fmt"
+	"sync"
 	"time"
 	"github.com/fatih/color"
 )
+
+var	mux sync.Mutex
+
 
 var bufferSize = 100
 
@@ -63,8 +67,10 @@ func MakeProcess(states func(*Process), name string, die chan Signal) chan<- Sig
 // It prints only when Logging is enabled.
 func Ignored(p *Process, s Signal) {
 	if logging {
-		d := color.New(color.FgCyan, color.Bold)
+		mux.Lock()
+		d := color.New(color.FgCyan)
 		d.Printf("PROCESS %s AT STATE %s: IGNORES %T, %v\n", p.name, p.currentState, s, s)
+		mux.Unlock()
 	}
 }
 
@@ -82,7 +88,10 @@ func State(p *Process, name string, f func(s Signal)) func() {
 		p.nextSaved = []Signal{}
 
 		if logging {
-			fmt.Printf("PROCESS %s AT STATE %s\n", p.name, p.currentState)
+			mux.Lock()
+			enterStateColor := color.New(color.FgBlue)
+			enterStateColor.Printf("PROCESS %s entered STATE %s\n", p.name, p.currentState)
+			mux.Unlock()
 		}
 		// first handle all messages in the saved buffer
 		for _, s := range p.saved {
@@ -102,9 +111,10 @@ func nextSignal(p *Process) (Signal, bool) {
 	select {
 	case s := <-p.buffer: // blocking if empty buffer
 		if logging {
-			red := color.New(color.FgRed)
-			boldRed := red.Add(color.Bold)
-			boldRed.Printf("PROCESS %s AT STATE %s: %T, %v\n", p.name, p.currentState, s, s)
+			mux.Lock()
+			nextSignalColor := color.New(color.FgRed)
+			nextSignalColor.Printf("PROCESS %s AT STATE %s: %T, %v\n", p.name, p.currentState, s, s)
+			mux.Unlock()
 		}
 		return s, false
 	case <-p.die: // signal for process termination
@@ -118,8 +128,11 @@ func ChannelConsumer(die chan Signal, n string, p chan Signal) {
 	for {
 		select {
 		case s := <-p: // blocking if empty buffer
+			mux.Lock()
+			consumerColor := color.New(color.FgYellow, color.Bold)
 			//if logging {
-			fmt.Printf("\t\t\t\t\t%T , %v\t->%s\n", s, s, n)
+			consumerColor.Printf("\t\t\t\t\t%T , %v\t-> %s\n", s, s, n)
+			mux.Unlock()
 			//}
 		case <-die: // signal for process termination
 			return
@@ -167,11 +180,18 @@ func Execute(ts ...Transmission) {
 func (t Transmission) Execute() {
 	time.Sleep(time.Duration(t.MsDelay) * time.Millisecond)
 	t.Receiver <- t.Signal
+	
+	mux.Lock()
+	transimssionColor := color.New(color.FgGreen, color.Bold)
+	transimssionColor.Printf("%T %v\n", t.Signal, t.Signal)
+	mux.Unlock()
 }
 
 // Helper function for printing a message that it is consumed as
 // a default action at a switch signal.
 func DefaultMsg(n string, s Signal) {
-	d := color.New(color.FgCyan, color.Bold)
+	mux.Lock()
+	d := color.New(color.FgCyan)
 	d.Printf("\t\t------ At state %s Consumed %v, %T\n", n, s, s)
+	mux.Unlock()
 }
