@@ -27,7 +27,7 @@ func Counter(p *sdl.Process) {
 				return
 			}
 		default:
-			sdl.DefaultMsg("goingUp", s)
+			sdl.DefaultMessage(p, s)
 		}
 	})
 	goingDn = sdl.State(p, "goingDn", func(s sdl.Signal) {
@@ -39,7 +39,7 @@ func Counter(p *sdl.Process) {
 				return
 			}
 		default:
-			sdl.DefaultMsg("goingDn", s)
+			sdl.DefaultMessage(p, s)
 		}
 	})
 
@@ -47,7 +47,7 @@ func Counter(p *sdl.Process) {
 }
 
 func Example() {
-	sdl.DisableLogging()
+	//sdl.DisableLogging()
 	die := make(chan sdl.Signal)
 
 	out = sdl.MakeBuffer()

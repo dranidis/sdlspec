@@ -194,9 +194,9 @@ func (t Transmission) Execute() {
 
 // Helper function for printing a message that it is consumed as
 // a default action at a switch signal.
-func DefaultMsg(n string, s Signal) {
+func DefaultMessage(p *Process, s Signal) {
 	mux.Lock()
 	d := color.New(color.FgCyan)
-	d.Printf("------ At state %s ignored %v, %T\n", n, s, s)
+	d.Printf("------ At state %s ignored %v, %T\n", p.currentState, s, s)
 	mux.Unlock()
 }
