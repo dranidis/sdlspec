@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type HI struct{
+type HI struct {
 	n int
 }
 type HO struct {
@@ -66,7 +66,7 @@ func TestChangingState(t *testing.T) {
 				testVar += 1
 			default:
 			}
-		})		
+		})
 		go start()
 	}, "hello1", die)
 
@@ -107,7 +107,7 @@ func TestSaveSignal(t *testing.T) {
 				testVar += 1
 			default:
 			}
-		})		
+		})
 		go start()
 	}, "hello1", die)
 
@@ -149,7 +149,7 @@ func TestSaveThenIgnoreSignal(t *testing.T) {
 				return
 			default:
 			}
-		})	
+		})
 		next2 = State(p, "next2", func(s Signal) {
 			switch s.(type) {
 			case HO:
@@ -157,7 +157,7 @@ func TestSaveThenIgnoreSignal(t *testing.T) {
 			case HI:
 			default:
 			}
-		})		
+		})
 		go start()
 	}, "hello2", die)
 

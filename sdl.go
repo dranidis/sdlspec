@@ -4,16 +4,16 @@ package sdl
 
 import (
 	_ "fmt"
+	"github.com/fatih/color"
 	"sync"
 	"time"
-	"github.com/fatih/color"
 )
 
-var	mux sync.Mutex
+var mux sync.Mutex
 
 var enterStateColor = color.New(color.FgBlue)
 var nextSignalColor = color.New(color.FgRed)
-var	consumerColor = color.New(color.FgYellow, color.Bold)
+var consumerColor = color.New(color.FgYellow, color.Bold)
 var transmissionColor = color.New(color.FgGreen, color.Bold)
 
 var bufferSize = 100
@@ -186,7 +186,7 @@ func Execute(ts ...Transmission) {
 func (t Transmission) Execute() {
 	time.Sleep(time.Duration(t.MsDelay) * time.Millisecond)
 	t.Receiver <- t.Signal
-	
+
 	mux.Lock()
 	transmissionColor.Printf("%T %v\n", t.Signal, t.Signal)
 	mux.Unlock()

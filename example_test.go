@@ -1,15 +1,15 @@
 package sdl_test
 
 import (
-	"time"
 	"github.com/dranidis/go-sdl-spec"
+	"time"
 )
 
 type UP struct {
 	n int
 }
-type DN struct {}
-type OVER struct {}
+type DN struct{}
+type OVER struct{}
 
 var out chan sdl.Signal
 
