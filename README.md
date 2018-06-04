@@ -1,5 +1,7 @@
 # SDL specification and simulation in GO
 
+[![GoDoc](https://godoc.org/github.com/dranidis/go-sdl-spec?status.svg)](https://godoc.org/github.com/dranidis/go-sdl-spec)
+
 The purpose of this package is to allow easy definition and simulation of SDL (Specification and Description Language http://sdl-forum.org/index.htm) processes in GO.
 
 This is an experimental project and is not fully tested yet.
