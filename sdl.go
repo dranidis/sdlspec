@@ -1,9 +1,8 @@
-// An attempt to simulate SDL specifications
+// Package sdl is an attempt to simulate SDL specifications
 // in GO.
 package sdl
 
 import (
-	_ "fmt"
 	"github.com/fatih/color"
 	"sync"
 	"time"
@@ -20,9 +19,12 @@ var bufferSize = 100
 
 var logging = true
 
+// DisableLogging turns logging off.
 func DisableLogging() {
 	logging = false
 }
+
+// EnableLogging turns logging on.
 func EnableLogging() {
 	logging = true
 }
@@ -46,6 +48,7 @@ func save(p *Process, s Signal) {
 	p.nextSaved = append(p.nextSaved, s)
 }
 
+// DieChannel returns the channel for the termination of the process.
 func DieChannel(p *Process) chan Signal {
 	return p.die
 }
@@ -124,7 +127,7 @@ func nextSignal(p *Process) (Signal, bool) {
 	}
 }
 
-// Reads all signals at channel p and logs them at std out
+// ChannelConsumer reads all signals at channel p and logs them at std out
 // together with the name of the consumer
 func ChannelConsumer(die chan Signal, n string, p chan Signal) {
 	for {
@@ -141,7 +144,7 @@ func ChannelConsumer(die chan Signal, n string, p chan Signal) {
 	}
 }
 
-// Sends all the signals in the signal list to channel c
+// SendSignalsWithDelay sends all the signals in the signal list to channel c
 // with a delay between each transmission equal to ms milliseconds
 func SendSignalsWithDelay(c chan<- Signal, ss []Signal, ms time.Duration) {
 	for _, s := range ss {
@@ -155,18 +158,18 @@ func SendSignalsWithDelay(c chan<- Signal, ss []Signal, ms time.Duration) {
 	}
 }
 
-// Creates and returns a buffer for asynchronous communication
+// MakeBuffer creates and returns a buffer for asynchronous communication
 // Buffersize is defined by SetBufferSize
 func MakeBuffer() chan Signal {
 	return make(chan Signal, bufferSize)
 }
 
-// Sets the size of process buffers. Default is 100
+// SetBufferSize sets the size of process buffers. Default is 100
 func SetBufferSize(s int) {
 	bufferSize = s
 }
 
-// Used for simulations. Defines a delay in ms, after which the signal is sent to
+// Transmission is used for simulations. Defines a delay in ms, after which the signal is sent to
 // the receiver channel. Executed with the Execute method for one Trasmission or with the
 // Execute function for a variant number of Transmissions.
 type Transmission struct {
@@ -175,14 +178,14 @@ type Transmission struct {
 	Signal   Signal
 }
 
-// Exetutes a number of Transmissions.
+// Execute exetutes a number of Transmissions.
 func Execute(ts ...Transmission) {
 	for _, t := range ts {
 		t.Execute()
 	}
 }
 
-// Executes a single Transmission.
+// Execute executes a single Transmission.
 func (t Transmission) Execute() {
 	time.Sleep(time.Duration(t.MsDelay) * time.Millisecond)
 	t.Receiver <- t.Signal
@@ -192,7 +195,7 @@ func (t Transmission) Execute() {
 	mux.Unlock()
 }
 
-// Helper function for printing a message that it is consumed as
+// DefaultMessage is a helper function for printing a message that it is consumed as
 // a default action at a switch signal.
 func DefaultMessage(p *Process, s Signal) {
 	mux.Lock()

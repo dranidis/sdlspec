@@ -63,7 +63,7 @@ func TestChangingState(t *testing.T) {
 		next = State(p, "next", func(s Signal) {
 			switch s.(type) {
 			case HI:
-				testVar += 1
+				testVar ++
 			default:
 			}
 		})
@@ -104,7 +104,7 @@ func TestSaveSignal(t *testing.T) {
 		next = State(p, "next", func(s Signal) {
 			switch s.(type) {
 			case HO:
-				testVar += 1
+				testVar++
 			default:
 			}
 		})
@@ -153,7 +153,7 @@ func TestSaveThenIgnoreSignal(t *testing.T) {
 		next2 = State(p, "next2", func(s Signal) {
 			switch s.(type) {
 			case HO:
-				testVar += 1
+				testVar++
 			case HI:
 			default:
 			}
