@@ -6,6 +6,8 @@ The purpose of this package is to allow easy definition and simulation of SDL (S
 
 This is an experimental project and is not fully tested yet.
 
+Examples of specifications can be found at: https://github.com/dranidis/sdlspec-examples
+
 ## Hello world example
 
 ```go
