@@ -56,15 +56,15 @@ func Example() {
 	go sdl.ChannelConsumer(die, "ENV", out)
 
 	sdl.Execute(
-		sdl.Transmission{MsDelay:10, Receiver:counterChan, Signal:UP{}},
-		sdl.Transmission{MsDelay:10, Receiver:counterChan, Signal:DN{}},
-		sdl.Transmission{MsDelay:10, Receiver:counterChan, Signal:UP{4}},
-		sdl.Transmission{MsDelay:10, Receiver:counterChan, Signal:DN{}},
-		sdl.Transmission{MsDelay:10, Receiver:counterChan, Signal:DN{}},
-		sdl.Transmission{MsDelay:10, Receiver:counterChan, Signal:DN{}},
-		sdl.Transmission{MsDelay:10, Receiver:counterChan, Signal:DN{}},
-		sdl.Transmission{MsDelay:10, Receiver:counterChan, Signal:DN{}},
-		sdl.Transmission{MsDelay:10, Receiver:counterChan, Signal:UP{}},
+		sdl.Transmission{MsDelay: 10, Receiver: counterChan, Signal: UP{}},
+		sdl.Transmission{MsDelay: 10, Receiver: counterChan, Signal: DN{}},
+		sdl.Transmission{MsDelay: 10, Receiver: counterChan, Signal: UP{4}},
+		sdl.Transmission{MsDelay: 10, Receiver: counterChan, Signal: DN{}},
+		sdl.Transmission{MsDelay: 10, Receiver: counterChan, Signal: DN{}},
+		sdl.Transmission{MsDelay: 10, Receiver: counterChan, Signal: DN{}},
+		sdl.Transmission{MsDelay: 10, Receiver: counterChan, Signal: DN{}},
+		sdl.Transmission{MsDelay: 10, Receiver: counterChan, Signal: DN{}},
+		sdl.Transmission{MsDelay: 10, Receiver: counterChan, Signal: UP{}},
 	)
 
 	time.Sleep(2000 * time.Millisecond)

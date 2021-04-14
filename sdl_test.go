@@ -63,7 +63,7 @@ func TestChangingState(t *testing.T) {
 		next = State(p, "next", func(s Signal) {
 			switch s.(type) {
 			case HI:
-				testVar ++
+				testVar++
 			default:
 			}
 		})
