@@ -1,4 +1,4 @@
-package sdl
+package sdlspec
 
 import (
 	"testing"

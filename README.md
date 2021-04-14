@@ -1,6 +1,6 @@
 # SDL specification and simulation in GO
 
-[![GoDoc](https://godoc.org/github.com/dranidis/go-sdl-spec?status.svg)](https://godoc.org/github.com/dranidis/go-sdl-spec)
+[![GoDoc](https://godoc.org/github.com/dranidis/sdlspec?status.svg)](https://godoc.org/github.com/dranidis/sdlspec)
 
 The purpose of this package is to allow easy definition and simulation of SDL (Specification and Description Language http://sdl-forum.org/index.htm) processes in GO.
 
@@ -15,13 +15,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dranidis/go-sdl-spec"
+	"github.com/dranidis/sdlspec"
 )
 
 type HI struct{}
 
-func helloStates(p *sdl.Process) {
-	start := sdl.State(p, "start", func(s sdl.Signal) {
+func helloStates(p *sdlspec.Process) {
+	start := sdlspec.State(p, "start", func(s sdlspec.Signal) {
 		switch s.(type) {
 		case HI:
 			fmt.Println("Hello SDL")
@@ -32,8 +32,8 @@ func helloStates(p *sdl.Process) {
 }
 
 func main() {
-	die := make(chan sdl.Signal)
-	helloProcess := sdl.MakeProcess(helloStates, "hello", die)
+	die := make(chan sdlspec.Signal)
+	helloProcess := sdlspec.MakeProcess(helloStates, "hello", die)
 	helloProcess <- HI{}
 
 	time.Sleep(1000 * time.Millisecond)
@@ -42,6 +42,7 @@ func main() {
 ```
 
 The output is:
+
 ```
 PROCESS hello AT STATE start: main.HI, {}
 Hello SDL
@@ -49,19 +50,26 @@ Hello SDL
 ```
 
 ## Signals
+
 Each SDL signal is declared as a new go struct type:
+
 ```go
 type HI struct {}
 ```
+
 ## Processes
-A process is created using the sdl.MakeProcess function:
+
+A process is created using the sdlspec.MakeProcess function:
+
 ```go
-	helloProcess := sdl.MakeProcess(helloStates, "hello", die)
+	helloProcess := sdlspec.MakeProcess(helloStates, "hello", die)
 ```
+
 that takes as a parameter a function like the following:
+
 ```go
-func helloStates(p *sdl.Process) {
-	start := sdl.State(p, "start", func(s sdl.Signal) {
+func helloStates(p *sdlspec.Process) {
+	start := sdlspec.State(p, "start", func(s sdlspec.Signal) {
 		switch s.(type) {
 		case HI:
 			fmt.Println("Hello SDL")
@@ -71,11 +79,15 @@ func helloStates(p *sdl.Process) {
 	go start()
 }
 ```
+
 The function defines a state **start** using the construction:
+
 ```go
-	start := sdl.State(p, "start", func(s sdl.Signal) { ... })
+	start := sdlspec.State(p, "start", func(s sdlspec.Signal) { ... })
 ```
+
 The callback function defines the behaviour at that state. The important part is within the switch statement:
+
 ```go
 		switch s.(type) {
 		case HI:
@@ -83,16 +95,21 @@ The callback function defines the behaviour at that state. The important part is
 		default:
 		}
 ```
+
 If the received signal is of type HI, print the Hello SDL message. Else ignore the signal. Note that the signal is consumed anyway.
 
 The process is spawned at the initial state with:
+
 ```go
 	go start()
 ```
+
 In the main:
+
 ```go
     helloProcess <- HI{}
     time.Sleep(2000 * time.Millisecond)
     close(die)
 ```
+
 we send the signal `HI{}` to the process, sleep for 2 secs and terminate all SDL processes by closing the `die` channel.

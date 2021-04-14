@@ -1,11 +1,12 @@
-// Package sdl is an attempt to simulate SDL specifications
+// Package sdlspec is an attempt to simulate SDL specifications
 // in GO.
-package sdl
+package sdlspec
 
 import (
-	"github.com/fatih/color"
 	"sync"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 var mux sync.Mutex

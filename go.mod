@@ -1,4 +1,4 @@
-module github.com/dranidis/go-sdl-spec
+module github.com/dranidis/sdlspec
 
 go 1.16
 
